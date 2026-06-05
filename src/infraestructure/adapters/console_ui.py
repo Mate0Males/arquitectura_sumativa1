@@ -55,12 +55,14 @@ class PedidoController:
                 print("\n--- NUEVO PEDIDO ---")
                 cedula = input("Ingrese la cédula del cliente: ")
                 productos_solicitados = []
+                
+                productos_menu = self.consultar_menu_uc.ejecutar()
+                stock_simulado = {p.id: p.stock for p in productos_menu}
 
                 while True:
                     print("\n--- PRODUCTOS DISPONIBLES ---")
-                    productos = self.consultar_menu_uc.ejecutar()
-                    for producto in productos:
-                        print(f"{producto.id} - {producto.nombre} (${producto.precio:.2f}) Stock: {producto.stock}")
+                    for producto in productos_menu:
+                        print(f"{producto.id} - {producto.nombre} (${producto.precio:.2f}) Stock: {stock_simulado[producto.id]}")
 
                     opcion_p = input("ID del producto (f para finalizar): ")
                     if opcion_p.lower() == "f":
@@ -73,7 +75,16 @@ class PedidoController:
                         print("Debe ingresar valores numéricos válidos.")
                         continue
 
+                    if producto_id not in stock_simulado:
+                        print("ID de producto no válido.")
+                        continue
+                        
+                    if stock_simulado[producto_id] < cantidad:
+                        print(f"¡Error! Stock insuficiente. Solo quedan {stock_simulado[producto_id]} unidades.")
+                        continue
+
                     productos_solicitados.append({"producto_id": producto_id, "cantidad": cantidad})
+                    stock_simulado[producto_id] -= cantidad
 
                 try:
                     pedido = self.crear_pedido_uc.ejecutar(cedula, productos_solicitados)
@@ -90,6 +101,7 @@ class PedidoController:
                     for linea in pedido.lineas:
                         print(f"{linea.cantidad}x {linea.producto.nombre} - ${linea.subtotal:.2f}")
                     print("====================================")
+                    
                 except ValueError as e:
                     print(f"Error al crear pedido: {e}")
 
@@ -101,6 +113,10 @@ class PedidoController:
 
                 for p in pedidos:
                     print(f"Pedido #{p.id} | Cliente: {p.cliente_nombre} | Total: ${p.calcular_total():.2f}")
+                    
+                    for linea in p.lineas:
+                        print(f"  └─ {linea.cantidad}x {linea.producto.nombre} (${linea.subtotal:.2f})")
+                    print("------------------------------------")
 
             elif opcion == "5":
                 print("Saliendo del sistema...")
