@@ -1,40 +1,37 @@
-# Sistema de Gestión de Pedidos de Comida (Código Espagueti)
-
-Este repositorio contiene una versión de demostración de un Sistema de Gestión de Pedidos de Comida desarrollado en Python mediante una aplicación de consola.
-
-Esta rama representa la implementación utilizando la arquitectura conocida como **Código Espagueti**.
+# Sistema de Gestión de Pedidos de Comida - Arquitectura Hexagonal y DDD
 
 ## Descripción
 
-En esta versión, toda la funcionalidad del sistema se encuentra concentrada en un único archivo (`main.py`). La lógica de negocio, la gestión de datos y la interacción con el usuario están mezcladas dentro del mismo flujo de ejecución.
+Este proyecto implementa un Sistema de Gestión de Pedidos de Comida utilizando los principios del **Diseño Guiado por el Dominio (DDD)** y **Arquitectura Hexagonal (Puertos y Adaptadores)**. El objetivo principal es aislar las reglas de negocio del dominio de cualquier infraestructura técnica o interfaz de usuario, garantizando un software altamente mantenible, escalable y acoplado de forma limpia.
 
-El propósito de esta implementación es evidenciar los problemas que surgen cuando una aplicación crece sin una adecuada organización de responsabilidades.
+## Arquitectura Implementada
 
-## Funcionalidades
+La aplicación está organizada siguiendo la separación de capas orientada a DDD y el flujo de dependencias concéntrico hacia el núcleo de negocio:
 
-El sistema permite:
+### 1. Capa de Dominio (`src/domain/`)
+Es el corazón del sistema, completamente agnóstica de frameworks o librerías externas. Contiene:
+* **Entidades y Objetos de Valor:** Modelos enriquecidos con su propia lógica y validaciones (`Producto`, `Cliente`, `Pedido`, `LineaPedido`, `Factura`).
+* **Lógica del Dominio:** Reglas esenciales como la verificación y reducción de stock, o el cálculo automático de subtotales, descuentos y totales.
 
-* Registrar productos de comida.
-* Visualizar los productos registrados.
-* Crear pedidos a partir de los productos disponibles.
-* Consultar los pedidos realizados.
-* Marcar pedidos como entregados.
+### 2. Capa de Aplicación (`src/application/`)
+Orquesta el comportamiento del sistema y sirve de puente entre el mundo exterior y el dominio:
+* **Puertos (`ports/`):** Interfaces abstractas (`PedidoRepositoryPort`) que definen los contratos que la infraestructura debe cumplir.
+* **Casos de Uso (`use_cases/`):** Flujos específicos e independientes de la aplicación (`ConsultarMenuUseCase`, `RegistrarClienteUseCase`, `CrearPedidoUseCase`, `VerPedidosUseCase`).
 
-## Características de la versión "Código Espagueti"
+### 3. Capa de Infraestructura (`src/infraestructure/`)
+Contiene los detalles técnicos y adaptadores que se conectan a los puertos definidos por la aplicación:
+* **Adaptadores de Entrada (UI):** `PedidoController` en `console_ui.py`, encargado de interactuar con el usuario por consola y ejecutar los casos de uso.
+* **Adaptadores de Salida (Persistencia):** `InMemoryPedidoRepository` en `memory_db.py`, encargado de simular el almacenamiento y persistencia de datos implementando el puerto del repositorio.
 
-* Toda la aplicación se encuentra en un único archivo (`main.py`).
-* Uso de listas y variables globales para almacenar información.
-* Ausencia de clases y objetos de dominio.
-* No existe separación entre la interfaz de usuario y la lógica de negocio.
-* Manipulación directa de datos desde diferentes secciones del programa.
-* Alta dependencia entre componentes.
-* Escasa reutilización de código.
-* Difícil mantenimiento y escalabilidad.
+## Funcionalidades Ubicuas
 
+* **Consultar Menú:** Recupera los productos disponibles con sus precios y existencias actuales.
+* **Registrar Cliente:** Registra nuevos compradores bajo categorías de negocio (`Regular` / `Frecuente`).
+* **Crear Pedido con Lógica de Dominio:** * Valida y disminuye el stock en tiempo real en la entidad del dominio.
+  * Calcula descuentos dinámicos (10%) si el cliente cumple el criterio de ser "Frecuente".
+  * Genera una factura estructurada basada en el estado del pedido.
+* **Historial de Pedidos:** Almacena y expone las transacciones realizadas en memoria.
 
-## Requisitos
-
-* Python 3.x
 
 ## Ejecución
 
@@ -44,13 +41,9 @@ Desde la terminal, ubicarse en la carpeta del proyecto y ejecutar:
 python main.py
 ```
 
-## Limitaciones
+## Limitaciones del Sistema
 
-Esta implementación presenta varios problemas comunes en sistemas poco estructurados:
-
-* Dificultad para agregar nuevas funcionalidades.
-* Mayor probabilidad de introducir errores al realizar cambios.
-* Baja mantenibilidad.
-* Escalabilidad limitada.
-* Complicaciones para realizar pruebas unitarias.
-
+* **Persistencia volátil:** Los datos se almacenan en memoria, por lo que todo se borra al cerrar el programa.
+* **Sin control de concurrencia:** No soporta accesos simultáneos de múltiples usuarios en tiempo real.
+* **Interfaz síncrona:** La consola bloquea el flujo del programa mientras espera que el usuario escriba.
+* **Acoplamiento de modelos:** Las entidades de dominio se guardan directamente sin un mapeador (*Data Mapper*) hacia la persistencia.
