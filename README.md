@@ -1,45 +1,56 @@
-# arquitectura_sumativa1
+# Sistema de Gestión de Pedidos de Comida (Código Espagueti)
 
-Proyecto académico para la materia de Arquitectura de Software que evalúa la evolución de un Sistema de Gestión de Pedidos de Comida.
+Este repositorio contiene una versión de demostración de un Sistema de Gestión de Pedidos de Comida desarrollado en Python mediante una aplicación de consola.
+
+Esta rama representa la implementación utilizando la arquitectura conocida como **Código Espagueti**.
 
 ## Descripción
 
-Este repositorio presenta tres enfoques distintos para implementar el mismo dominio de negocio:
+En esta versión, toda la funcionalidad del sistema se encuentra concentrada en un único archivo (`main.py`). La lógica de negocio, la gestión de datos y la interacción con el usuario están mezcladas dentro del mismo flujo de ejecución.
 
-* **feature/espagueti:** una versión con anti-patrones y diseño poco modular.
-* **feature/capas:** un enfoque monolítico organizado en capas.
-* **feature/ddd:** una implementación basada en Domain-Driven Design (DDD).
+El propósito de esta implementación es evidenciar los problemas que surgen cuando una aplicación crece sin una adecuada organización de responsabilidades.
 
-Cada enfoque reside en su propia rama `feature/` y permite comparar cómo evoluciona la arquitectura desde una implementación básica y poco estructurada hasta un diseño más mantenible, escalable y alineado con buenas prácticas de desarrollo.
+## Funcionalidades
 
-## Dominio del Proyecto
+El sistema permite:
 
-El sistema permite gestionar pedidos de comida mediante funcionalidades como:
+* Registrar productos de comida.
+* Visualizar los productos registrados.
+* Crear pedidos a partir de los productos disponibles.
+* Consultar los pedidos realizados.
+* Marcar pedidos como entregados.
 
-* Registro de productos.
-* Consulta de productos disponibles.
-* Creación de pedidos.
-* Consulta de pedidos registrados.
-* Actualización del estado de los pedidos.
-* Gestión básica del flujo de entrega.
+## Características de la versión "Código Espagueti"
 
-## Propósito
+* Toda la aplicación se encuentra en un único archivo (`main.py`).
+* Uso de listas y variables globales para almacenar información.
+* Ausencia de clases y objetos de dominio.
+* No existe separación entre la interfaz de usuario y la lógica de negocio.
+* Manipulación directa de datos desde diferentes secciones del programa.
+* Alta dependencia entre componentes.
+* Escasa reutilización de código.
+* Difícil mantenimiento y escalabilidad.
 
-* Mostrar las limitaciones y riesgos del código espagueti.
-* Comparar la organización de una arquitectura monolítica por capas.
-* Explorar los beneficios de Domain-Driven Design (DDD) en un sistema de gestión de pedidos.
-* Analizar cómo una misma problemática puede resolverse utilizando distintos enfoques arquitectónicos.
 
-## Estructura de Ramas
+## Requisitos
 
-| Rama              | Arquitectura               |
-| ----------------- | -------------------------- |
-| feature/espagueti | Código Espagueti           |
-| feature/capas     | Monolítico por Capas       |
-| feature/ddd       | Domain-Driven Design (DDD) |
+* Python 3.x
 
-## Tecnologías Utilizadas
+## Ejecución
 
-* Python 3
-* Git
-* Visual Studio Code
+Desde la terminal, ubicarse en la carpeta del proyecto y ejecutar:
+
+```bash
+python main.py
+```
+
+## Limitaciones
+
+Esta implementación presenta varios problemas comunes en sistemas poco estructurados:
+
+* Dificultad para agregar nuevas funcionalidades.
+* Mayor probabilidad de introducir errores al realizar cambios.
+* Baja mantenibilidad.
+* Escalabilidad limitada.
+* Complicaciones para realizar pruebas unitarias.
+
