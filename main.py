@@ -1,170 +1,154 @@
-# ============================
-# SISTEMA DE PEDIDOS DE COMIDA
-# VERSION CODIGO ESPAGUETI
-# ============================
+PRODUCTOS = [
+    {"id": 1, "nombre": "Hamburguesa Clásica", "precio": 4.50, "stock": 15},
+    {"id": 2, "nombre": "Pizza Personal", "precio": 6.75, "stock": 10},
+    {"id": 3, "nombre": "Hot Dog Especial", "precio": 3.25, "stock": 20}
+]
 
-productos = []
-pedidos = []
+CLIENTES = [
+    {"cedula": "1101234567", "nombre": "Carlos Mendoza", "categoria": "Regular"},
+    {"cedula": "1107654321", "nombre": "Ana Torres", "categoria": "Frecuente"}
+]
 
-id_producto = 1
-id_pedido = 1
+PEDIDOS = []
 
-while True:
+def ejecutar_sistema():
+    while True:
+        print("\n====================================")
+        print(" SISTEMA DE PEDIDOS DE COMIDA ")
+        print("====================================")
+        print("1. Ver Menú")
+        print("2. Registrar Cliente")
+        print("3. Crear Pedido")
+        print("4. Ver Pedidos")
+        print("5. Salir")
+        
+        opcion = input("Seleccione una opción: ")
 
-    print("\n==============================")
-    print(" SISTEMA DE PEDIDOS DE COMIDA ")
-    print("==============================")
-    print("1. Registrar producto")
-    print("2. Ver productos")
-    print("3. Crear pedido")
-    print("4. Ver pedidos")
-    print("5. Entregar pedido")
-    print("6. Salir")
-
-    opcion = input("\nSeleccione una opción: ")
-
-    # REGISTRAR PRODUCTO
-    if opcion == "1":
-
-        nombre = input("Ingrese el nombre del producto: ")
-
-        try:
-            precio = float(input("Ingrese el precio: "))
-        except:
-            print("Precio inválido")
-            continue
-
-        producto = {
-            "id": id_producto,
-            "nombre": nombre,
-            "precio": precio
-        }
-
-        productos.append(producto)
-
-        print("Producto registrado correctamente.")
-
-        id_producto += 1
-
-    # VER PRODUCTOS
-    elif opcion == "2":
-
-        if len(productos) == 0:
-            print("No existen productos registrados.")
-        else:
-            print("\n--- LISTA DE PRODUCTOS ---")
-
-            for producto in productos:
+        if opcion == "1":
+            print("\n--- MENÚ DISPONIBLE ---")
+            for producto in PRODUCTOS:
                 print(
                     f"ID: {producto['id']} | "
-                    f"Nombre: {producto['nombre']} | "
-                    f"Precio: ${producto['precio']:.2f}"
+                    f"{producto['nombre']} | "
+                    f"Precio: ${producto['precio']:.2f} | "
+                    f"Stock: {producto['stock']}"
                 )
 
-    # CREAR PEDIDO
-    elif opcion == "3":
+        elif opcion == "2":
+            print("\n--- REGISTRAR CLIENTE ---")
+            cedula = input("Cédula: ")
+            nombre = input("Nombre: ")
+            categoria = input("Categoría (Regular/Frecuente): ")
 
-        if len(productos) == 0:
-            print("Debe registrar productos primero.")
-            continue
+            CLIENTES.append({
+                "cedula": cedula,
+                "nombre": nombre,
+                "categoria": categoria
+            })
+            print("Cliente registrado correctamente.")
 
-        print("\n--- PRODUCTOS DISPONIBLES ---")
+        elif opcion == "3":
+            print("\n--- NUEVO PEDIDO ---")
+            cedula_cliente = input("Ingrese la cédula del cliente: ")
+            cliente = None
 
-        for producto in productos:
-            print(
-                f"{producto['id']} - "
-                f"{producto['nombre']} "
-                f"(${producto['precio']:.2f})"
-            )
+            for c in CLIENTES:
+                if c["cedula"] == cedula_cliente:
+                    cliente = c
+                    break
 
-        try:
-            id_seleccionado = int(
-                input("Ingrese el ID del producto: ")
-            )
-        except:
-            print("ID inválido")
-            continue
+            if cliente is None:
+                print("Cliente no registrado.")
+                continue
 
-        producto_encontrado = None
+            detalle_pedido = []
+            subtotal = 0
 
-        for producto in productos:
-            if producto["id"] == id_seleccionado:
-                producto_encontrado = producto
+            while True:
+                id_producto = input("ID del producto (f para finalizar): ")
 
-        if producto_encontrado is None:
-            print("Producto no encontrado.")
-        else:
+                if id_producto.lower() == "f":
+                    break
+
+                producto = None
+                for p in PRODUCTOS:
+                    if str(p["id"]) == id_producto:
+                        producto = p
+                        break
+
+                if producto is None:
+                    print("Producto no encontrado.")
+                    continue
+
+                cantidad = int(input(f"Cantidad de {producto['nombre']}: "))
+
+                if cantidad > producto["stock"]:
+                    print(f"Stock insuficiente. Disponible: {producto['stock']}")
+                    continue
+
+                producto["stock"] -= cantidad
+                total_item = producto["precio"] * cantidad
+                subtotal += total_item
+
+                detalle_pedido.append({
+                    "producto": producto["nombre"],
+                    "cantidad": cantidad,
+                    "precio": producto["precio"],
+                    "total": total_item
+                })
+                print("Producto agregado al pedido.")
+
+            if len(detalle_pedido) == 0:
+                print("Pedido cancelado.")
+                continue
+
+            descuento = 0
+            if cliente["categoria"].upper() == "FRECUENTE":
+                descuento = subtotal * 0.05
+
+            total_pagar = subtotal - descuento
 
             pedido = {
-                "id": id_pedido,
-                "producto": producto_encontrado["nombre"],
-                "precio": producto_encontrado["precio"],
-                "estado": "Pendiente"
+                "id": len(PEDIDOS) + 1,
+                "cliente": cliente["nombre"],
+                "detalle": detalle_pedido,
+                "subtotal": subtotal,
+                "descuento": descuento,
+                "total": total_pagar
             }
+            PEDIDOS.append(pedido)
 
-            pedidos.append(pedido)
+            print("\n====================================")
+            print(" FACTURA DEL PEDIDO ")
+            print("====================================")
+            print(f"Pedido N°: {pedido['id']}")
+            print(f"Cliente: {pedido['cliente']}")
+            print("------------------------------------")
+            for item in pedido["detalle"]:
+                print(f"{item['cantidad']}x {item['producto']} - ${item['total']:.2f}")
+            print("------------------------------------")
+            print(f"Subtotal: ${pedido['subtotal']:.2f}")
+            print(f"Descuento: ${pedido['descuento']:.2f}")
+            print(f"Total: ${pedido['total']:.2f}")
+            print("====================================")
 
-            print("Pedido creado correctamente.")
-            print(f"Número de pedido: {id_pedido}")
-
-            id_pedido += 1
-
-    # VER PEDIDOS
-    elif opcion == "4":
-
-        if len(pedidos) == 0:
-            print("No existen pedidos registrados.")
-        else:
-
-            print("\n--- LISTA DE PEDIDOS ---")
-
-            for pedido in pedidos:
-
+        elif opcion == "4":
+            print("\n--- HISTORIAL DE PEDIDOS ---")
+            if len(PEDIDOS) == 0:
+                print("No existen pedidos registrados.")
+            for pedido in PEDIDOS:
                 print(
                     f"Pedido #{pedido['id']} | "
-                    f"Producto: {pedido['producto']} | "
-                    f"Precio: ${pedido['precio']:.2f} | "
-                    f"Estado: {pedido['estado']}"
+                    f"Cliente: {pedido['cliente']} | "
+                    f"Total: ${pedido['total']:.2f}"
                 )
 
-    # ENTREGAR PEDIDO
-    elif opcion == "5":
+        elif opcion == "5":
+            print("Saliendo del sistema...")
+            break
 
-        if len(pedidos) == 0:
-            print("No existen pedidos.")
-            continue
+        else:
+            print("Opción inválida.")
 
-        try:
-            id_buscar = int(
-                input("Ingrese el ID del pedido: ")
-            )
-        except:
-            print("ID inválido")
-            continue
-
-        encontrado = False
-
-        for pedido in pedidos:
-
-            if pedido["id"] == id_buscar:
-
-                encontrado = True
-
-                if pedido["estado"] == "Entregado":
-                    print("El pedido ya fue entregado.")
-                else:
-                    pedido["estado"] = "Entregado"
-                    print("Pedido entregado correctamente.")
-
-        if not encontrado:
-            print("Pedido no encontrado.")
-
-    # SALIR
-    elif opcion == "6":
-
-        print("Saliendo del sistema...")
-        break
-
-    else:
-
-        print("Opción inválida.")
+if __name__ == "__main__":
+    ejecutar_sistema()
